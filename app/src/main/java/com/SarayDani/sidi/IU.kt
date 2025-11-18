@@ -2,41 +2,34 @@ package com.SarayDani.sidi
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun IU() {
-    val score = remember { mutableStateOf(0) }
-    val gameState = remember { mutableStateOf(GameState.INACTIVE) }
+fun IU(vm: MyViewModel) {
+
+    val estado by vm.estadoActual.collectAsState()
+    val ronda by vm.ronda.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF360157)) // Fondo morado
+            .background(Color(0xFF360157)) // Fondo morado ORIGINAL
     ) {
-        // Barra superior para el score
+
+        // ------------------------------
+        // BARRA SUPERIOR: RONDA (antes Score)
+        // ------------------------------
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -44,74 +37,61 @@ fun IU() {
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
-            ScoreDisplay(score = score.value)
+            Text(
+                text = "Ronda: $ronda",
+                color = Color.White,
+                fontSize = 20.sp
+            )
         }
 
-        // Área principal con botones y control superpuesto
+        // ------------------------------
+        // ÁREA PRINCIPAL (Botonera + Start en medio)
+        // ------------------------------
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            // Botonera que ocupa el espacio disponible
+
+            // 4 botones originales
             Botonera(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onColorClick = { vm.introducirSecuencia(it) }
             )
 
-            // Botón de Start/Pause superpuesto y más pequeño
-            ControlButton(
-                gameState = gameState.value,
-                onToggle = {
-                    gameState.value = if (gameState.value == GameState.INACTIVE)
-                        GameState.ACTIVE
-                    else
-                        GameState.INACTIVE
-                },
-                modifier = Modifier.size(80.dp) // Más pequeño
-            )
+            // Botón START pequeño y centrado COMO EL ORIGINAL
+            if (estado == Estados.Inicio || estado == Estados.GameOver) {
+                Button(
+                    onClick = { vm.empezarJuego() },
+                    modifier = Modifier.size(80.dp),  // Tamaño original
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF360157) // El mismo color que el original
+                    ),
+                    shape = CircleShape
+                ) {
+                    Text(
+                        text = "▶",
+                        fontSize = 40.sp,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
 
+/**
+ * BOTONERA EXACTA A LA ORIGINAL
+ */
 @Composable
-fun ScoreDisplay(score: Int, modifier: Modifier = Modifier) {
-    Text(
-        text = "Score: $score",
-        color = Color.White,
-        fontSize = 20.sp,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun ControlButton(
-    gameState: GameState,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+fun Botonera(
+    modifier: Modifier = Modifier,
+    onColorClick: (Int) -> Unit
 ) {
-    Button(
-        onClick = onToggle,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = (Color(0xFF360157))
-        ),
-        shape =  CircleShape// Sin bordes redondeados
-    ) {
-        Text(
-            text = if (gameState == GameState.INACTIVE) "▶" else "||",
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold
-
-        )
-    }
-}
-
-@Composable
-fun Botonera(modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
-        // Fila superior (rojo y amarillo)
+
+        // Fila superior: ROJO - AMARILLO
         Row(
             modifier = Modifier
                 .weight(1f)
@@ -120,19 +100,20 @@ fun Botonera(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(2.dp) // Reducido el padding
+                    .padding(2.dp)
             ) {
-                Boton(Colores.CLASE_ROJO)
+                Boton(Colores.CLASE_ROJO, 0, onColorClick)
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(2.dp) // Reducido el padding
+                    .padding(2.dp)
             ) {
-                Boton(Colores.CLASE_AMARILLO)
+                Boton(Colores.CLASE_AMARILLO, 3, onColorClick)
             }
         }
-        // Fila inferior (verde y azul)
+
+        // Fila inferior: VERDE - AZUL
         Row(
             modifier = Modifier
                 .weight(1f)
@@ -141,40 +122,35 @@ fun Botonera(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(2.dp) // Reducido el padding
+                    .padding(2.dp)
             ) {
-                Boton(Colores.CLASE_VERDE)
+                Boton(Colores.CLASE_VERDE, 1, onColorClick)
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(2.dp) // Reducido el padding
+                    .padding(2.dp)
             ) {
-                Boton(Colores.CLASE_AZUL)
+                Boton(Colores.CLASE_AZUL, 2, onColorClick)
             }
         }
     }
 }
 
+/**
+ * BOTÓN DE COLOR EXACTO AL ORIGINAL
+ */
 @Composable
-fun Boton(enum_color: Colores) {
+fun Boton(color: Colores, index: Int, onColorClick: (Int) -> Unit) {
     Button(
-        colors = ButtonDefaults.buttonColors(containerColor = enum_color.color),
-        onClick = { Log.d("Juego", "Click en ${enum_color.txt}") },
+        onClick = {
+            Log.d("IU", "Click en ${color.txt}")
+            onColorClick(index)
+        },
         modifier = Modifier.fillMaxSize(),
-        shape = RectangleShape // Sin bordes redondeados
+        colors = ButtonDefaults.buttonColors(color.color),
+        shape = RectangleShape  // Igual al original
     ) {
-        Text(text = enum_color.txt, fontSize = 10.sp)
+        Text(color.txt, fontSize = 10.sp, color = Color.Black)
     }
-}
-
-enum class GameState {
-    INACTIVE,
-    ACTIVE
-}
-
-@Preview(showBackground = true)
-@Composable
-fun IUPreview() {
-    IU()
 }
