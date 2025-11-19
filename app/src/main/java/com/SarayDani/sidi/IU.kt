@@ -1,6 +1,12 @@
 package com.SarayDani.sidi
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -18,6 +24,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 @Composable
 fun IU(vm: MyViewModel) {
@@ -30,8 +37,11 @@ fun IU(vm: MyViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF4C007A)) // Fondo morado ORIGINAL
+            .statusBarsPadding()           // <-- evita solapamiento con barra superior / notch
+            .navigationBarsPadding()       // <-- opcional: evita solapamiento con barra de navegación
     ) {
 
+        TopNotification(estado = estado)
         // ------------------------------
         // BARRA SUPERIOR: RONDA (antes Score)
         // ------------------------------
@@ -108,6 +118,9 @@ fun IU(vm: MyViewModel) {
         )
     }
 }
+
+
+
 /**
  * Diálogo que se muestra al perder (Game Over).
  */
@@ -120,18 +133,28 @@ fun GameOverDialog(
 ) {
     AlertDialog(
         onDismissRequest = onClose, // Se llama si el usuario pulsa fuera del diálogo
+        containerColor = Color(0xFF4C007A),
         title = {
             Text(
                 text = "¡Has perdido!",
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
+                fontSize = 24.sp,
+                color = Color(0xFFFDFBF6) // Título en tono crema claro
             )
         },
         text = {
             Column {
-                Text(text = "Llegaste a la ronda: $rondaActual", fontSize = 18.sp)
+                Text(
+                    text = "Llegaste a la ronda: $rondaActual",
+                    fontSize = 18.sp,
+                    color = Color(0xFFFDFBF6) // Texto principal en tono cálido
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Tu récord es: $record", fontSize = 18.sp)
+                Text(
+                    text = "Tu récord es: $record",
+                    fontSize = 18.sp,
+                    color = Color(0xFFFDFBF6) // Texto secundario más claro
+                )
             }
         },
         confirmButton = {
@@ -147,6 +170,62 @@ fun GameOverDialog(
     )
 }
 
+
+/**
+ * Banner superior que aparece/desaparece según el estado.
+ */
+@Composable
+fun TopNotification(estado: Estados) {
+    var visible by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
+    val bgColor = when (estado) {
+        Estados.GenerarSecuencia -> Color(0xFF2E7D32) // verde oscuro
+        Estados.IntroducirSecuencia -> Color(0xFF1565C0) // azul
+        Estados.GameOver -> Color(0xFFB00020) // rojo
+        Estados.Inicio -> Color(0xFF6A1B9A) // morado
+        Estados.Pausa -> Color(0xFF37474F) // gris
+    }
+
+    LaunchedEffect(estado) {
+        message = when (estado) {
+            Estados.GenerarSecuencia -> "Reproduciendo secuencia..."
+            Estados.IntroducirSecuencia -> "Tu turno: introduce la secuencia"
+            Estados.GameOver -> "¡Game Over!"
+            Estados.Inicio -> "Pulsa START para comenzar"
+            Estados.Pausa -> "Pausa"
+        }
+        // Mostrar banner brevemente
+        visible = true
+
+    }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInVertically(
+            initialOffsetY = { -it },
+            animationSpec = tween(durationMillis = 350)
+        ) + fadeIn(animationSpec = tween(200)),
+        exit = slideOutVertically(
+            targetOffsetY = { -it },
+            animationSpec = tween(durationMillis = 300)
+        ) + fadeOut(animationSpec = tween(200))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(bgColor)
+                .padding(vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = message,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
 
 /**
  * BOTONERA EXACTA A LA ORIGINAL
