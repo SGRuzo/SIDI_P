@@ -16,7 +16,7 @@ Pausa --> RepetirSecuenciaUsuario
 GameOver --> Idle
 
 ```
-
+## Persistencia de Datos en rama featurePersistencia
 ## Vídeo Demostrativo
 
 ![DemostracionSIDI.gif](DemostracionSIDI.gif)

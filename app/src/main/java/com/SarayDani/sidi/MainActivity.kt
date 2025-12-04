@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            IU(myViewModel)
+            IU(application, myViewModel)
         }
     }
 }

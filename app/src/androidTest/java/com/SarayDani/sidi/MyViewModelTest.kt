@@ -1,5 +1,6 @@
 package com.SarayDani.sidi
 
+import androidx.test.core.app.ApplicationProvider
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,12 +12,13 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyViewModelTest {
 
+    private val app = ApplicationProvider.getApplicationContext<android.app.Application>()
     private lateinit var vm: MyViewModel
 
 
     @Test
     fun testEmpezarJuego() = runTest {
-        vm = MyViewModel()
+        vm = MyViewModel(app)
         vm.empezarJuego()
         advanceUntilIdle()
 
@@ -28,7 +30,7 @@ class MyViewModelTest {
 
     @Test
     fun testGenerarSecuencia() = runTest {
-        vm = MyViewModel()
+        vm = MyViewModel(app)
         vm.empezarJuego()
         advanceUntilIdle()
 
@@ -46,7 +48,7 @@ class MyViewModelTest {
 
     @Test
     fun testAciertoSecuencia() = runTest {
-        vm = MyViewModel()
+        vm = MyViewModel(app)
         vm.empezarJuego()
         advanceUntilIdle()
 
@@ -62,7 +64,7 @@ class MyViewModelTest {
 
     @Test
     fun testFalloSecuencia() = runTest {
-        vm = MyViewModel()
+        vm = MyViewModel(app)
         vm.empezarJuego()
 
         // Espera hasta que el estado sea el turno del jugador
@@ -84,7 +86,7 @@ class MyViewModelTest {
 
     @Test
     fun testRecord() = runTest {
-        vm = MyViewModel()
+        vm = MyViewModel(app)
 
         // Simula rondas anteriores
         repeat(5) {
