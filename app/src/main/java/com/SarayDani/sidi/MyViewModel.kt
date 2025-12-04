@@ -1,13 +1,18 @@
 package com.SarayDani.sidi
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Date
+import kotlin.text.compareTo
 
-class MyViewModel() : ViewModel() {
+class MyViewModel(application: Application) : AndroidViewModel(application) {
 
     // Tag para los logs
     private val TAG_LOG = "miDebug"
@@ -17,7 +22,8 @@ class MyViewModel() : ViewModel() {
     val botonEncendido =MutableStateFlow<Int?>(null)
     val secuenciaJugador =MutableStateFlow(mutableListOf<Int>())
     val ronda =MutableStateFlow(0)
-    val record =MutableStateFlow(0)
+    val recordp =MutableStateFlow(0)
+    val record: StateFlow<Int> get() = recordp
 
     // Duraciones para animaciones de luz
     private val duracionEncendido=500L
@@ -25,7 +31,7 @@ class MyViewModel() : ViewModel() {
     private val duracionInicial= 900L
 
     init {
-        Log.d(TAG_LOG, "Inicializando el ViewModel - Estado: ${Estados.Inicio}")
+        recordp.value = Controller.obtenerRecord(getApplication()).record
     }
 
     /**
@@ -112,8 +118,9 @@ class MyViewModel() : ViewModel() {
      */
     private fun gameOver() {
         estadoActual.value=Estados.GameOver
-        if (ronda.value>record.value) {
-            record.value=ronda.value
+        if (ronda.value > recordp.value) {
+            recordp.value = ronda.value
+            Controller.actualizarRecord(recordp.value, Date(), getApplication())
         }
         botonEncendido.value=null // apagar luces por si acaso
         Log.d(TAG_LOG, "GAME OVER. Ronda alcanzada: ${ronda.value}")
@@ -123,11 +130,21 @@ class MyViewModel() : ViewModel() {
      * Vuelve al estado inicial sin empezar una nueva partida.
      */
     fun resetToInicio() {
-        estadoActual.value=Estados.Inicio
-        ronda.value=0
+        estadoActual.value = Estados.Inicio
+        ronda.value = 0
         secuencia.value.clear()
         secuenciaJugador.value.clear()
-        botonEncendido.value=null
+        botonEncendido.value = null
+    }
+
+    fun comprobarRecord() {
+        if (ronda.value > Controller.obtenerRecord(getApplication()).record) {
+            val fechaActual = java.util.Date() // objeto Date que espera la función
+            val fechaFormateada = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            Log.d(TAG_LOG, "Nuevo récord en: $fechaFormateada")
+            Controller.actualizarRecord(ronda.value, fechaActual, getApplication())
+        }
     }
 
 }
+
