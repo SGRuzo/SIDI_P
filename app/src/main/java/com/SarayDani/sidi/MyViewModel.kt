@@ -32,9 +32,11 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
         cargarRecordInicial()
     }
 
+    /**
+     * Carga el mejor récord desde SQLite.
+     */
     private fun cargarRecordInicial() {
         viewModelScope.launch {
-            // Cargar en un hilo de fondo para no bloquear la UI
             val record = ControllerSQLite.obtenerRecord(getApplication())  // Usar Controller (no ControllerSQLite)
             recordp.value = record.record
             Log.d(TAG_LOG, "Record cargado desde SQLite: ${record.record}, fecha: ${record.fecha}")
