@@ -10,6 +10,9 @@ import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * recoge los datos de la tabla
+ */
 object RecordContract {
     object RecordEntry : BaseColumns {
         const val TABLE_NAME = "records"
@@ -27,6 +30,7 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         const val DATABASE_VERSION = 1
         const val DATABASE_NAME = "SimonRecords.db"
 
+        // para crear tabla
         private const val SQL_CREATE_ENTRIES = """
             CREATE TABLE ${RecordContract.RecordEntry.TABLE_NAME} (
                 ${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,10 +39,12 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             )
         """
 
+        // para elimnar tabla
         private const val SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS ${RecordContract.RecordEntry.TABLE_NAME}"
     }
 
+    // Crear tabla
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(SQL_CREATE_ENTRIES)
         Log.d(TAG_LOG, "Tabla 'records' creada")
@@ -48,59 +54,63 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         Log.d(TAG_LOG, "Registro inicial insertado")
     }
 
+    // Actualizar tabla
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL(SQL_DELETE_ENTRIES)
         Log.d(TAG_LOG, "Tabla 'records' eliminada por upgrade")
         onCreate(db)
     }
 
+    // Eliminar tabla
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         onUpgrade(db, oldVersion, newVersion)
     }
 
-    // ============ OPERACIONES CRUD ============
 
     /**
-     * CREATE: Inserta un nuevo récord
+     * funcion publica para insertar un nuevo récord
      */
     fun insertRecord(record: Int, fecha: Date): Long {
         val db = writableDatabase
         return insertRecord(db, record, fecha)
     }
 
+    /**
+     * Declara una función privada que recibe una instancia de SQLiteDatabase, un entero record y una Date.
+     * Devuelve un Long que es el ID de la fila insertada o -1 si falla.
+     */
     private fun insertRecord(db: SQLiteDatabase, record: Int, fecha: Date): Long {
         val values = ContentValues().apply {
             put(RecordContract.RecordEntry.COLUMN_RECORD, record)
             put(RecordContract.RecordEntry.COLUMN_FECHA, FORMATO_FECHA.format(fecha))
         }
-
         val newRowId = db.insertWithOnConflict(
             RecordContract.RecordEntry.TABLE_NAME,
             null,
             values,
             SQLiteDatabase.CONFLICT_IGNORE
         )
-
         if (newRowId != -1L) {
             Log.d(TAG_LOG, "Record insertado con ID: $newRowId")
         } else {
             Log.e(TAG_LOG, "Error insertando record")
         }
-
         return newRowId
     }
 
     /**
-     * READ: Obtiene el mejor récord (el más alto)
+     * Obtiene el mejor récord (el más alto)
      */
     fun getBestRecord(): Record {
         val db = readableDatabase
 
+        // Consulta para obtener el mejor récord
         val projection = arrayOf(
             RecordContract.RecordEntry.COLUMN_RECORD,
             RecordContract.RecordEntry.COLUMN_FECHA
         )
 
+        // Ordenar por el campo "record" en orden descendente y limitar a 1
         val cursor: Cursor = db.query(
             RecordContract.RecordEntry.TABLE_NAME,
             projection,
@@ -112,17 +122,18 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             "1"
         )
 
+        // Procesar el cursor para obtener el mejor récord
         return try {
             if (cursor.moveToFirst()) {
                 val record = cursor.getInt(cursor.getColumnIndexOrThrow(RecordContract.RecordEntry.COLUMN_RECORD))
                 val fechaString = cursor.getString(cursor.getColumnIndexOrThrow(RecordContract.RecordEntry.COLUMN_FECHA))
 
+                // Convertir la cadena de fecha a un objeto Date
                 val fecha = try {
                     FORMATO_FECHA.parse(fechaString) ?: Date()
                 } catch (e: Exception) {
                     Date()
                 }
-
                 Record(record, fecha)
             } else {
                 Log.d(TAG_LOG, "No hay records, devolviendo valor por defecto")
@@ -133,76 +144,4 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
-    /**
-     * READ: Obtiene todos los récords ordenados
-     */
-    fun getAllRecords(): List<Record> {
-        val db = readableDatabase
-
-        val projection = arrayOf(
-            BaseColumns._ID,
-            RecordContract.RecordEntry.COLUMN_RECORD,
-            RecordContract.RecordEntry.COLUMN_FECHA
-        )
-
-        val cursor: Cursor = db.query(
-            RecordContract.RecordEntry.TABLE_NAME,
-            projection,
-            null,
-            null,
-            null,
-            null,
-            "${RecordContract.RecordEntry.COLUMN_RECORD} DESC, ${RecordContract.RecordEntry.COLUMN_FECHA} DESC"
-        )
-
-        val records = mutableListOf<Record>()
-
-        with(cursor) {
-            while (moveToNext()) {
-                val id = getLong(getColumnIndexOrThrow(BaseColumns._ID))
-                val record = getInt(getColumnIndexOrThrow(RecordContract.RecordEntry.COLUMN_RECORD))
-                val fechaString = getString(getColumnIndexOrThrow(RecordContract.RecordEntry.COLUMN_FECHA))
-
-                val fecha = try {
-                    FORMATO_FECHA.parse(fechaString) ?: Date()
-                } catch (e: Exception) {
-                    Date()
-                }
-
-                records.add(Record(record, fecha))
-            }
-        }
-
-        cursor.close()
-        return records
-    }
-
-
-
-    /**
-     * Metodo de utilidad: Obtiene estadísticas de la base de datos
-     */
-    fun getDatabaseStats(): DatabaseStats {
-        val db = readableDatabase
-
-        val cursor = db.rawQuery(
-            "SELECT COUNT(*) as count, MAX(${RecordContract.RecordEntry.COLUMN_RECORD}) as max_record FROM ${RecordContract.RecordEntry.TABLE_NAME}",
-            null
-        )
-
-        return if (cursor.moveToFirst()) {
-            val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-            val maxRecord = cursor.getInt(cursor.getColumnIndexOrThrow("max_record"))
-            cursor.close()
-            DatabaseStats(count, maxRecord)
-        } else {
-            cursor.close()
-            DatabaseStats(0, 0)
-        }
-    }
-
-    /**
-     * Data class para estadísticas
-     */
-    data class DatabaseStats(val totalRecords: Int, val bestRecord: Int)
 }
