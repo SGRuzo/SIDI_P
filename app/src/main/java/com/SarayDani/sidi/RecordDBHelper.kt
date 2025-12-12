@@ -21,7 +21,7 @@ object RecordContract {
 class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     private val TAG_LOG = "RecordDbHelper"
-    private val FORMATO_FECHA = SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH)
+    private val FORMATO_FECHA = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     companion object {
         const val DATABASE_VERSION = 1
@@ -177,75 +177,10 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return records
     }
 
-    /**
-     * UPDATE: Actualiza un récord existente (por ID)
-     */
-    fun updateRecord(id: Long, record: Int, fecha: Date): Int {
-        val db = writableDatabase
 
-        val values = ContentValues().apply {
-            put(RecordContract.RecordEntry.COLUMN_RECORD, record)
-            put(RecordContract.RecordEntry.COLUMN_FECHA, FORMATO_FECHA.format(fecha))
-        }
-
-        val selection = "${BaseColumns._ID} = ?"
-        val selectionArgs = arrayOf(id.toString())
-
-        return db.update(
-            RecordContract.RecordEntry.TABLE_NAME,
-            values,
-            selection,
-            selectionArgs
-        )
-    }
 
     /**
-     * DELETE: Elimina un récord por ID
-     */
-    fun deleteRecord(id: Long): Int {
-        val db = writableDatabase
-
-        val selection = "${BaseColumns._ID} = ?"
-        val selectionArgs = arrayOf(id.toString())
-
-        return db.delete(
-            RecordContract.RecordEntry.TABLE_NAME,
-            selection,
-            selectionArgs
-        )
-    }
-
-    /**
-     * DELETE: Elimina todos los récords
-     */
-    fun deleteAllRecords(): Int {
-        val db = writableDatabase
-        return db.delete(RecordContract.RecordEntry.TABLE_NAME, null, null)
-    }
-
-    /**
-     * Método de utilidad: Mantiene solo los N mejores récords
-     */
-    fun keepTopRecords(limit: Int = 10) {
-        val db = writableDatabase
-
-        val deleteQuery = """
-            DELETE FROM ${RecordContract.RecordEntry.TABLE_NAME} 
-            WHERE ${BaseColumns._ID} NOT IN (
-                SELECT ${BaseColumns._ID} 
-                FROM ${RecordContract.RecordEntry.TABLE_NAME} 
-                ORDER BY ${RecordContract.RecordEntry.COLUMN_RECORD} DESC, 
-                         ${RecordContract.RecordEntry.COLUMN_FECHA} DESC 
-                LIMIT $limit
-            )
-        """.trimIndent()
-
-        db.execSQL(deleteQuery)
-        Log.d(TAG_LOG, "Manteniendo solo los $limit mejores récords")
-    }
-
-    /**
-     * Método de utilidad: Obtiene estadísticas de la base de datos
+     * Metodo de utilidad: Obtiene estadísticas de la base de datos
      */
     fun getDatabaseStats(): DatabaseStats {
         val db = readableDatabase

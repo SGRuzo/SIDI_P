@@ -137,12 +137,6 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
                 val nuevoRecord = ControllerSQLite.actualizarRecord(ronda.value, fechaActual, getApplication())  // Usar Controller
                 Log.d(TAG_LOG, "Nuevo récord guardado en SQLite: ${nuevoRecord.record}, fecha: ${nuevoRecord.fecha}")
 
-                // Opcional: Mostrar todos los récords
-                val todosRecords = ControllerSQLite.obtenerTodosLosRecords(getApplication())  // Usar Controller
-                Log.d(TAG_LOG, "Historial de récords:")
-                todosRecords.forEachIndexed { index, record ->
-                    Log.d(TAG_LOG, "${index + 1}. Record: ${record.record}, Fecha: ${record.fecha}")
-                }
             }
         }
 
