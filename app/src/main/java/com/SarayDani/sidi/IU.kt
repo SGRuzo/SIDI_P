@@ -24,6 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SarayDani.sidi.Datos.Colores
+import com.SarayDani.sidi.Datos.Colores_luz
+import com.SarayDani.sidi.Datos.Estados
 
 @Composable
 fun IU(application: Application, vm: MyViewModel) {

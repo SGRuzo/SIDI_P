@@ -1,6 +1,7 @@
 package com.SarayDani.sidi
 
 import androidx.test.core.app.ApplicationProvider
+import com.SarayDani.sidi.Datos.Estados
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi

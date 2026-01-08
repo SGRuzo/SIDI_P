@@ -4,6 +4,10 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.SarayDani.sidi.DAO.AppDatabase
+import com.SarayDani.sidi.DAO.RecordDAO
+import com.SarayDani.sidi.DAO.RecordEntidad
+import com.SarayDani.sidi.Datos.Estados
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,13 +24,16 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     val botonEncendido = MutableStateFlow<Int?>(null)
     val secuenciaJugador = MutableStateFlow(mutableListOf<Int>())
     val ronda = MutableStateFlow(0)
-    val recordp = MutableStateFlow(0)
+    private val recordp = MutableStateFlow(0)
     val record: StateFlow<Int> get() = recordp
+
+    private val recordDao = AppDatabase.getDatabase(application).recordDao()
 
     // Duraciones para animaciones de luz
     private val duracionEncendido = 500L
     private val duracionIntermitencia = 250L
     private val duracionInicial = 900L
+
 
     init {
         cargarRecordInicial()
@@ -36,11 +43,9 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
      * Carga el mejor récord desde SQLite.
      */
     private fun cargarRecordInicial() {
-        viewModelScope.launch {
-            val record = ControllerSQLite.obtenerRecord(getApplication())  // Usar Controller (no ControllerSQLite)
-            recordp.value = record.record
-            Log.d(TAG_LOG, "Record cargado desde SQLite: ${record.record}, fecha: ${record.fecha}")
-        }
+        val entidad = recordDao.obtenerRecord()
+        recordp.value = entidad?.record ?: 0
+        Log.d(TAG_LOG, "Record cargado de Room: ${recordp.value}")
     }
 
     /**
@@ -128,20 +133,17 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     private fun gameOver() {
         estadoActual.value = Estados.GameOver
 
-        // Verificar si es nuevo récord
-        val recordActual = ControllerSQLite.obtenerRecord(getApplication()).record  // Usar Controller
-        if (ronda.value > recordActual) {
+        // Consulta y guarda de forma directa
+        val recordExistente = recordDao.obtenerRecord()?.record ?: 0
+
+        if (ronda.value > recordExistente) {
             recordp.value = ronda.value
-            val fechaActual = Date()
-
-            // Guardar nuevo récord en SQLite
-            viewModelScope.launch {
-                val nuevoRecord = ControllerSQLite.actualizarRecord(ronda.value, fechaActual, getApplication())  // Usar Controller
-                Log.d(TAG_LOG, "Nuevo récord guardado en SQLite: ${nuevoRecord.record}, fecha: ${nuevoRecord.fecha}")
-
-            }
+            recordDao.guardarRecord(
+                RecordEntidad(record = ronda.value, fecha = System.currentTimeMillis())
+            )
+            Log.d(TAG_LOG, "Nuevo récord guardado con ROOM")
         }
-
+        // 3. Limpieza de UI
         botonEncendido.value = null
         Log.d(TAG_LOG, "GAME OVER. Ronda alcanzada: ${ronda.value}")
     }
