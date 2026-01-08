@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.SarayDani.sidi.DAO.AppDatabase
-import com.SarayDani.sidi.DAO.RecordDAO
 import com.SarayDani.sidi.DAO.RecordEntidad
 import com.SarayDani.sidi.Datos.Estados
 import kotlinx.coroutines.delay
@@ -143,7 +142,7 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
             )
             Log.d(TAG_LOG, "Nuevo récord guardado con ROOM")
         }
-        // 3. Limpieza de UI
+        // Limpieza de UI
         botonEncendido.value = null
         Log.d(TAG_LOG, "GAME OVER. Ronda alcanzada: ${ronda.value}")
     }
