@@ -1,7 +1,7 @@
 # USO ROOM EN SIMON DICE
 ## Configuración del Proyecto (`build.gradle.kts`)
 
-1. **Plugin KAPT:** Se habilitó `kotlin("kapt")` para permitir el procesamiento de anotaciones de Room, lo que genera automáticamente el código de implementación de las interfaces DAO.
+1. **Plugin KAPT:** Se habilitó `kotlin("kapt")` para permitir el procesamiento de Room.
 ```kotlin
 plugins {
     alias(libs.plugins.android.application)
@@ -13,7 +13,7 @@ plugins {
 
 2. **Dependencias:**
 * `room-runtime`: Librería base para el funcionamiento de la base de datos.
-* `room-compiler`: Procesador de anotaciones necesario en tiempo de compilación.
+* `room-compiler`: Procesador de anotaciones necesario para la compilación.
 
 ```kotlin
 val room_version = "2.8.4"
