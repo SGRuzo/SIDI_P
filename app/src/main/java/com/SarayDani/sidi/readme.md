@@ -149,3 +149,4 @@ private fun gameOver() {
 | **¿Por qué ID = 1?**  | Como este juego solo tiene **un récord**, no necesitamos una lista infinita de datos. Usar siempre el número 1 es como tener un único "cajón" donde siempre guardamos y actualizamos el mismo número.
 |
 | **¿Por qué `allowMainThreadQueries`?** | Normalmente, las bases de datos son lentas y pueden congelar la pantalla. Pero como aquí solo guardamos **un solo número**, lo activamos para que el código sea mucho más corto y fácil de entender sin que el móvil se trabe. |
+
