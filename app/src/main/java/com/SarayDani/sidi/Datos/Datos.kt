@@ -8,6 +8,8 @@ data class Datos (
     var secuenciaIntroducida: MutableList<Int> = mutableListOf(), // Secuencia del jugador
     var record: Int = 0,                      // Máximo número de rondas superadas
     var estados: Estados = Estados.Inicio,    // Estado actual del juego
+    // Nueva variable con nombre del jugador
+    var nombreJugador: String = ""
 )
 
 enum class Colores_luz(val color: Color, val txt: String) {

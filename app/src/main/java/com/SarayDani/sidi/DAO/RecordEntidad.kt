@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class RecordEntidad(
     @PrimaryKey val id: Int = 1, // Usamos un ID fijo porque solo guardamos un récord global
     val record: Int,
-    val fecha: Long // Guardamos la fecha como Long (timestamp)
+    val fecha: Long, // Guardamos la fecha como Long (timestamp)
+    val nombreJugador: String // Nuevo campo para el nombre del jugador
 )

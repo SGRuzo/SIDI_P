@@ -35,6 +35,7 @@ fun IU(application: Application, vm: MyViewModel) {
     val estado by vm.estadoActual.collectAsState()
     val ronda by vm.ronda.collectAsState()
     val record by vm.record.collectAsState()
+    val nombreJugador by vm.nombreJugador.collectAsState()
     val botonEncendido by vm.botonEncendido.collectAsState()
 
     Column(
@@ -62,6 +63,7 @@ fun IU(application: Application, vm: MyViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Récord: $record", color = Color.White, fontSize = 20.sp)
+                Text("$nombreJugador", color = Color.White, fontSize = 20.sp)
                 Text("Ronda: $ronda", color = Color.White, fontSize = 20.sp)
             }
         }
@@ -102,6 +104,7 @@ fun IU(application: Application, vm: MyViewModel) {
         GameOverDialog(
             rondaActual = ronda,
             record = record,
+            nombreJugador = nombreJugador,
             onColorClick = { /* botones inactivos en esta pantalla */ },
             onPlayAgain = { vm.empezarJuego() },
             onClose = { vm.resetToInicio() }
@@ -115,6 +118,7 @@ fun IU(application: Application, vm: MyViewModel) {
 fun GameOverDialog(
     rondaActual: Int,
     record: Int,
+    nombreJugador: String,
     onColorClick: (Int) -> Unit,
     onPlayAgain: () -> Unit,
     onClose: () -> Unit
@@ -125,7 +129,7 @@ fun GameOverDialog(
 
         title = {
             Text(
-                text = "¡Has perdido!",
+                text = "¡Has perdido! $nombreJugador",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
                 color = Color(0xFFFDFBF6)
@@ -139,6 +143,7 @@ fun GameOverDialog(
                     fontSize = 18.sp,
                     color = Color(0xFFFDFBF6)
                 )
+
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "Tu récord es: $record",
