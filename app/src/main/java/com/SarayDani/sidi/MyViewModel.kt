@@ -139,6 +139,10 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
                 val nuevoRecord = ControllerSQLite.actualizarRecord(ronda.value, fechaActual, getApplication())  // Usar Controller
                 Log.d(TAG_LOG, "Nuevo récord guardado en SQLite: ${nuevoRecord.record}, fecha: ${nuevoRecord.fecha}")
 
+
+                if (nuevoRecord.record <= 10) {
+                    Log.d(TAG_LOG, "Record entre los diez primeros: ${nuevoRecord.record} en la fecha: ${nuevoRecord.fecha}")
+                }
             }
         }
 

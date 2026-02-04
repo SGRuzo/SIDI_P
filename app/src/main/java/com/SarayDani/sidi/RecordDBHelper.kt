@@ -119,7 +119,7 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             null,
             null,
             "${RecordContract.RecordEntry.COLUMN_RECORD} DESC",
-            "1"
+            "10"
         )
 
         // Procesar el cursor para obtener el mejor récord
@@ -143,5 +143,4 @@ class RecordDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             cursor.close()
         }
     }
-
 }
