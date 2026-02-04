@@ -1,5 +1,6 @@
 package com.SarayDani.sidi
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -25,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun IU(vm: MyViewModel) {
+fun IU(application: Application, vm: MyViewModel) {
 
     // Observamos los estados del ViewModel
     val estado by vm.estadoActual.collectAsState()
