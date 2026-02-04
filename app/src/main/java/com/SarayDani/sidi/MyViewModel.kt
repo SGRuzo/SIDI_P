@@ -25,6 +25,9 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     val ronda = MutableStateFlow(0)
     private val recordp = MutableStateFlow(0)
     val record: StateFlow<Int> get() = recordp
+    // Nuevo campo para el nombre del jugador
+    val nombreJugador = MutableStateFlow("Manolo")
+
 
     private val recordDao = AppDatabase.getDatabase(application).recordDao()
 
@@ -138,7 +141,7 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
         if (ronda.value > recordExistente) {
             recordp.value = ronda.value
             recordDao.guardarRecord(
-                RecordEntidad(record = ronda.value, fecha = System.currentTimeMillis())
+                RecordEntidad(record = ronda.value, fecha = System.currentTimeMillis(), nombreJugador = "Jugador")
             )
             Log.d(TAG_LOG, "Nuevo récord guardado con ROOM")
         }
